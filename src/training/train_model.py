@@ -143,7 +143,7 @@ class SnowboardTrainer: # Renamed from ImprovedSnowboardTrainer
             optimizer=optimizer,
             loss={'trick_class': 'sparse_categorical_crossentropy', 'success_flag': 'binary_crossentropy'},
             loss_weights={'trick_class': 1.0, 'success_flag': 0.5},
-            metrics={'trick_class': ['accuracy', tf.keras.metrics.TopKCategoricalAccuracy(k=2, name='top2_accuracy')], 'success_flag': 'accuracy'}
+            metrics={'trick_class': ['accuracy', tf.keras.metrics.SparseTopKCategoricalAccuracy(k=2, name='top2_accuracy')], 'success_flag': 'accuracy'}
         )
         return model
     
