@@ -133,11 +133,7 @@ class SnowboardTrainer: # Renamed from ImprovedSnowboardTrainer
         
         model = models.Model(inputs=input_layer, outputs=[class_output, success_output])
         
-        initial_learning_rate = 0.001
-        lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
-            initial_learning_rate, decay_steps=100, decay_rate=0.96, staircase=True)
-        
-        optimizer = tf.keras.optimizers.Adam(learning_rate=lr_schedule)
+        optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)
         
         model.compile(
             optimizer=optimizer,
