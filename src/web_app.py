@@ -68,7 +68,6 @@ def render_analyze_page():
         if st.button("解析開始"):
             with st.spinner('AIが解析中...'):
                 # 特徴量保存パスを生成
-                project_root = os.path.dirname(current_dir)
                 output_dir = os.path.join(project_root, "data", "output")
                 base_filename = os.path.splitext(uploaded_file.name)[0]
                 feature_filename = f"{base_filename}_features.npy"
@@ -127,9 +126,9 @@ def process_video(input_path, output_feature_path=None):
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     fps = int(cap.get(cv2.CAP_PROP_FPS))
     
-    # 出力用一時ファイル
+    # 出力用一時ファイル (MP4形式に変更)
     output_path = os.path.join(tempfile.gettempdir(), 'output_analyzed.mp4')
-    fourcc = cv2.VideoWriter_fourcc(*'avc1')
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
 
     all_keypoints = []
