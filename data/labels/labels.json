@@ -1,0 +1,22 @@
+{
+  "nose_ollie_001_features.npy": {
+    "trick_class": 0,
+    "success_flag": 1
+  },
+  "nose_ollie_002_features.npy": {
+    "trick_class": 0,
+    "success_flag": 1
+  },
+  "nose_ollie_003_features.npy": {
+    "trick_class": 0,
+    "success_flag": 0
+  },
+  "nose_ollie_004_features.npy": {
+    "trick_class": 0,
+    "success_flag": 1
+  },
+  "nose_ollie_005_features.npy": {
+    "trick_class": 0,
+    "success_flag": 1
+  }
+}

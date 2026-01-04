@@ -3,3 +3,11 @@ __pycache__/
 *.pyc
 .DS_Store
 .env
+
+# データファイル（個人用データのため）
+data/input/*
+data/output/*
+
+# 一時ファイル
+*.tmp
+*.log

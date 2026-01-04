@@ -1,0 +1,47 @@
+{
+  "trick_classes": {
+    "0": {
+      "id": 0,
+      "name": "nose_ollie",
+      "display_name": "Nose Ollie",
+      "description": "ノーリー"
+    },
+    "1": {
+      "id": 1,
+      "name": "tail_press",
+      "display_name": "Tail Press",
+      "description": "テールプレス"
+    },
+    "2": {
+      "id": 2,
+      "name": "butter_180",
+      "display_name": "Butter 180",
+      "description": "バター180"
+    },
+    "3": {
+      "id": 3,
+      "name": "nose_ollie_180",
+      "display_name": "Nose Ollie 180",
+      "description": "ノーリー180"
+    }
+  },
+  "success_labels": {
+    "0": {
+      "id": 0,
+      "name": "NG",
+      "display_name": "NG（失敗）",
+      "description": "技が未完成または失敗"
+    },
+    "1": {
+      "id": 1,
+      "name": "OK",
+      "display_name": "OK（成功）",
+      "description": "技が成功"
+    }
+  },
+  "metadata": {
+    "version": "1.0",
+    "last_updated": "2026-01-04",
+    "description": "スノーボードAIの技分類マスタデータ"
+  }
+}
