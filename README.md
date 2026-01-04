@@ -73,6 +73,7 @@ python main.py --input data/input/my_trick.mp4
 
 ```bash
 python src/preprocessing/extract_and_save_features.py --input data/input/my_trick.mp4 --output-dir data/features
+
 ```
 
 #### 2. ラベル付け
