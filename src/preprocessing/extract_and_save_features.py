@@ -8,11 +8,6 @@ import os
 import argparse
 import sys
 
-# プロジェクトルートをパスに追加
-current_dir = os.path.dirname(os.path.abspath(__file__))
-src_dir = os.path.dirname(current_dir)
-sys.path.insert(0, src_dir)
-
 from pose.movenet import MoveNet
 from preprocessing.extract_features import FeatureExtractor
 

@@ -5,6 +5,7 @@ import os
 import numpy as np
 import tensorflow as tf
 import sys
+import time
 import pandas as pd
 import re
 import shutil
@@ -12,13 +13,16 @@ import io
 import zipfile
 from pathlib import Path
 
-# srcディレクトリをパスに追加してモジュールをインポート可能にする
+# --- Path Setup ---
+# このスクリプトのディレクトリ(src)とプロジェクトルートを定義
 current_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(current_dir)
-sys.path.append(os.path.dirname(current_dir))
+project_root = os.path.dirname(current_dir)
+# プロジェクトルートをPythonの検索パスに追加
+if project_root not in sys.path:
+    sys.path.append(project_root)
 
 from pose.movenet import MoveNet
-from preprocessing.extract_features_improved import ImprovedFeatureExtractor
+from preprocessing.extract_features import FeatureExtractor
 from visualize.draw_pose import PoseVisualizer
 from analysis.inference import TrickAnalyzer
 from analysis.rules import RuleBasedFeedback
@@ -125,7 +129,7 @@ def process_video(input_path, output_feature_path=None):
     
     # 出力用一時ファイル
     output_path = os.path.join(tempfile.gettempdir(), 'output_analyzed.mp4')
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    fourcc = cv2.VideoWriter_fourcc(*'avc1')
     out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
 
     all_keypoints = []
@@ -153,7 +157,19 @@ def process_video(input_path, output_feature_path=None):
     
     # 特徴量抽出と推論
     all_keypoints_np = np.array(all_keypoints)
-    features = feature_extractor.extract(all_keypoints_np)
+    
+    # まず全42種類の特徴量を抽出
+    all_features = feature_extractor.extract(all_keypoints_np)
+    
+    # 古いモデル(12特徴量)との互換性のために特徴量をスライス
+    # 14個の基本特徴量から最初の6個、14個の速度から最初の6個を選択
+    if all_features.shape[1] == 42:
+        base_features_compat = all_features[:, 0:6]
+        velocity_features_compat = all_features[:, 14:20] # 14(基本) + 6 = 20
+        features = np.hstack([base_features_compat, velocity_features_compat])
+    else:
+        # 万が一、古い形式で実行された場合のフォールバック
+        features = all_features
 
     # 特徴量を保存
     if output_feature_path:

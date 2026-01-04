@@ -3,6 +3,7 @@ import cv2
 import os
 import numpy as np
 import sys
+import json
 
 # srcディレクトリをパスに追加
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -15,12 +16,30 @@ from visualize.draw_pose import PoseVisualizer
 from analysis.inference import TrickAnalyzer
 from analysis.rules import RuleBasedFeedback
 
+def load_trick_names(config_path="data/config/trick_classes.json"):
+    """設定ファイルからトリック名とIDの辞書を読み込む"""
+    try:
+        with open(config_path, 'r', encoding='utf-8') as f:
+            config = json.load(f)
+        # JSONの構造に合わせて 'display_name' を取得
+        trick_names = {int(k): v['display_name'] for k, v in config['trick_classes'].items()}
+        return trick_names
+    except FileNotFoundError:
+        print(f"Warning: Config file not found at {config_path}. Using default trick names.")
+        return {0: "Nose Press", 1: "Tail Press", 2: "Butter 180"}
+    except (json.JSONDecodeError, KeyError) as e:
+        print(f"Warning: Error reading or parsing config file: {e}. Using default trick names.")
+        return {0: "Nose Press", 1: "Tail Press", 2: "Butter 180"}
+
 def main():
     parser = argparse.ArgumentParser(description='Snowboard AI Analysis Tool')
     parser.add_argument('--input', type=str, required=True, help='Path to input video')
     parser.add_argument('--output', type=str, default='data/output/output.mp4', help='Path to output video')
     parser.add_argument('--model', type=str, default='models/trained/snowboard_lstm.h5', help='Path to trained model')
     args = parser.parse_args()
+
+    # 設定ファイルからトリック名を取得
+    trick_names = load_trick_names()
 
     # パス設定
     input_path = args.input
@@ -80,6 +99,10 @@ def main():
     # モデル入力サイズに合わせてリサイズ (例: 60フレーム)
     target_timesteps = 60
     current_timesteps = features.shape[0]
+
+    if current_timesteps == 0:
+        print("Error: No features extracted. Cannot run inference.")
+        return
     
     # 簡易的なリサンプリング
     indices = np.linspace(0, current_timesteps - 1, target_timesteps).astype(int)
@@ -88,7 +111,6 @@ def main():
     print("Running inference...")
     trick_id, success_prob = analyzer.predict(resampled_features)
     
-    trick_names = {0: "Nose Press", 1: "Tail Press", 2: "Butter 180"}
     trick_name = trick_names.get(trick_id, "Unknown") if trick_id is not None else "Model Not Loaded"
     
     # フィードバック生成

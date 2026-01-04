@@ -103,3 +103,4 @@ class ImprovedFeatureExtractor(FeatureExtractor):
         combined_features = np.hstack([features, diffs, accels])
         return combined_features
 
+
