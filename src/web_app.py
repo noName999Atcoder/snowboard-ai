@@ -8,6 +8,9 @@ import sys
 import pandas as pd
 import re
 import shutil
+import io
+import zipfile
+from pathlib import Path
 
 # srcディレクトリをパスに追加してモジュールをインポート可能にする
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -15,7 +18,7 @@ sys.path.append(current_dir)
 sys.path.append(os.path.dirname(current_dir))
 
 from pose.movenet import MoveNet
-from preprocessing.extract_features import FeatureExtractor
+from preprocessing.extract_features_improved import ImprovedFeatureExtractor
 from visualize.draw_pose import PoseVisualizer
 from analysis.inference import TrickAnalyzer
 from analysis.rules import RuleBasedFeedback
@@ -30,7 +33,7 @@ def main():
     st.sidebar.title("Menu")
     mode = st.sidebar.radio(
         "モード選択", 
-        ["解析 (Analyze)", "教師データ追加 (Add Training Data)", "学習 (Train)", "ラベルマスタ管理 (Label Master)", "一括ラベル付け (Batch Labeling)"]
+        ["解析 (Analyze)", "教師データ追加 (Add Training Data)", "学習 (Train)", "ラベルマスタ管理 (Label Master)", "一括ラベル付け (Batch Labeling)", "データ管理 (Data Management)"]
     )
 
     if mode == "解析 (Analyze)":
@@ -41,6 +44,8 @@ def main():
         render_label_master_page()
     elif mode == "一括ラベル付け (Batch Labeling)":
         render_batch_labeling_page()
+    elif mode == "データ管理 (Data Management)":
+        render_data_management_page()
     else:
         render_train_page()
 
@@ -287,7 +292,7 @@ def render_add_training_data_page():
             feature_filename = f"{trick_name_input}_{next_seq:03d}_features.npy"
             
             # 既存ファイルの情報を表示
-            if existing_trick_names and trick_name_input in existing_trick_names:
+            if existing_trick_names and trick_name_input in existing_feature_names:
                 pattern = re.compile(rf'^{re.escape(trick_name_input)}_(\d+)_features\.npy$')
                 existing_files = []
                 for filename in os.listdir(features_dir):
@@ -489,7 +494,7 @@ def render_add_training_data_page():
                 if st.button("ラベルを追加", type="primary"):
                     try:
                         # 複数ラベル対応：同じファイル名に複数のラベルを保存
-                        # ラベルファイルの構造を変更：{filename: [label1, label2, ...]}
+                        # ラベルファイルの構造を変更：{filename: [label1, label2, ...]}}
                         if feature_filename not in label_manager.labels:
                             label_manager.labels[feature_filename] = []
                         
@@ -952,6 +957,45 @@ def render_batch_labeling_page():
             st.success(f"処理完了！ {success_count}件のファイルを登録し、{error_count}件のエラーがありました。")
             time.sleep(2) # メッセージ表示のためのウェイト
             st.rerun()
+
+def render_data_management_page():
+    """
+    データ管理ページを描画する
+    """
+    st.header("データ管理")
+    create_zip_and_download_button()
+
+def create_zip_and_download_button():
+    """
+    dataディレクトリ全体をzip化し、ダウンロードボタンを表示する
+    """
+    st.subheader("全データのダウンロード")
+    st.write("現在の`data`ディレクトリのすべての内容をzipファイルとしてダウンロードします。")
+
+    project_root = Path(current_dir).parent
+    data_dir = project_root / "data"
+
+    if not data_dir.is_dir():
+        st.warning("`data`ディレクトリが見つかりません。")
+        return
+
+    # メモリ上でzipファイルを作成
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zip_file:
+        for file_path in data_dir.glob('**/*'):
+            if file_path.is_file():
+                # zipファイル内のパスを data/xxx のように設定
+                zip_path = file_path.relative_to(data_dir.parent)
+                zip_file.write(file_path, arcname=str(zip_path))
+
+    zip_buffer.seek(0)
+
+    st.download_button(
+        label="Download `data` directory as .zip",
+        data=zip_buffer,
+        file_name="snowboard_ai_data.zip",
+        mime="application/zip"
+    )
 
 if __name__ == "__main__":
     main()
